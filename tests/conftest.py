@@ -28,3 +28,20 @@ def clubs():
     ]
     
     return clubs
+
+@pytest.fixture
+def competitions():
+    competitions = [
+        {
+            "name": "Spring Festival",
+            "date": "2020-03-27 10:00:00",
+            "numberOfPlaces": "25"
+        },
+        {
+            "name": "Fall Classic",
+            "date": "2020-10-22 13:30:00",
+            "numberOfPlaces": "13"
+        }
+    ]
+    
+    return competitions
