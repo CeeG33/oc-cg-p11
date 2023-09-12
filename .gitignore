@@ -2,8 +2,8 @@ bin
 include/
 Lib/
 Scripts/
-.Python
 tests/
+.Python
 .envrc
 __pycache__/
 pyvenv.cfg
