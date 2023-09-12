@@ -52,3 +52,14 @@ class TestPurchasePlaces:
         assert "This is not a correct value. Please try again." in response.data.decode()
         assert "Points available: 8" in response.data.decode()
         
+    def test_cannot_purchase_more_than_12_places(self, client, single_club, single_competition) :
+        competition = single_competition["name"]
+        club = single_club["name"]
+        club_points = int(single_club["points"])
+        places_booked = 15
+
+        response = client.post("/purchasePlaces", data={"club": club, "competition": competition, "places": places_booked})
+        
+        assert "This is not a correct value. Please try again." in response.data.decode()
+        assert "Points available: 8" in response.data.decode()
+        
