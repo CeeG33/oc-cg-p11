@@ -45,3 +45,23 @@ def competitions():
     ]
     
     return competitions
+
+@pytest.fixture
+def single_club():
+    club = {
+        "name":"Simply Lift",
+        "email":"john@simplylift.co",
+        "points":"13"
+    }
+
+    return club
+
+@pytest.fixture
+def single_competition():
+    competition = {
+        "name": "Spring Festival",
+        "date": "2020-03-27 10:00:00",
+        "numberOfPlaces": "25"
+    }
+
+    return competition
