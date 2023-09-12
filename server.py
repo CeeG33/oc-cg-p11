@@ -1,7 +1,7 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
-NUMBER_OF_BOOKINGS_PER_COMPETITIONS = 12
+MAXIMUM_BOOKINGS = 12
 
 def loadClubs():
     with open('clubs.json') as c:
@@ -40,8 +40,16 @@ def showSummary():
 def book(competition,club):
     foundClub = [c for c in clubs if c['name'] == club][0]
     foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    
+    club_points = int(foundClub["points"])
+    places_allowed = MAXIMUM_BOOKINGS
+    
+    if club_points < places_allowed:
+        places_allowed = club_points
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
+    
     if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
     else:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
@@ -53,9 +61,12 @@ def purchasePlaces():
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     club_points = int(club["points"])
     placesRequired = int(request.form['places'])
-    places_remaining = 12
+    places_allowed = MAXIMUM_BOOKINGS
     
-    if placesRequired > club_points:
+    if club_points < places_allowed:
+        places_allowed = club_points
+    
+    if placesRequired > club_points and placesRequired > places_allowed:
         flash("You don't have enough points to book this quantity. Please try again.")
         return render_template('welcome.html', club=club, competitions=competitions)
     
@@ -63,15 +74,11 @@ def purchasePlaces():
         flash("This is not a correct value. Please try again.")
         return render_template('welcome.html', club=club, competitions=competitions)
     
-    elif placesRequired > places_remaining:
-        flash(f"You have only {places_remaining} places left on this competition. Please try again.")
-        return render_template('welcome.html', club=club, competitions=competitions)
-    
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     
     club["points"] = int(club["points"]) - placesRequired
     
-    places_remaining = places_remaining - placesRequired
+    places_allowed = places_allowed - placesRequired
     
     flash('Great-booking complete!')
     
