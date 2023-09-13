@@ -1,6 +1,7 @@
 import json
 from flask import Flask,render_template,request,redirect,flash,url_for
 
+MAXIMUM_BOOKINGS = 12
 
 def loadClubs():
     with open('clubs.json') as c:
@@ -39,8 +40,20 @@ def showSummary():
 def book(competition,club):
     foundClub = [c for c in clubs if c['name'] == club][0]
     foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    
+    club_points = int(foundClub["points"])
+    places_allowed = MAXIMUM_BOOKINGS
+    
+    if club_points == "0":
+        flash("You do not have enough points to book places.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    if club_points < places_allowed:
+        places_allowed = club_points
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
+    
     if foundClub and foundCompetition:
-        return render_template('booking.html',club=foundClub,competition=foundCompetition)
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
     else:
         flash("Something went wrong-please try again")
         return render_template('welcome.html', club=club, competitions=competitions)
@@ -52,9 +65,13 @@ def purchasePlaces():
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     club_points = int(club["points"])
     placesRequired = int(request.form['places'])
+    places_allowed = MAXIMUM_BOOKINGS
     
-    if placesRequired > club_points:
-        flash("You don't have enough points to book this quantity. Please try again.")
+    if club_points < places_allowed:
+        places_allowed = club_points
+    
+    if placesRequired > club_points or placesRequired > places_allowed:
+        flash("You are not allowed to book this quantity. Please try again.")
         return render_template('welcome.html', club=club, competitions=competitions)
     
     elif placesRequired <= 0:
@@ -64,6 +81,8 @@ def purchasePlaces():
     competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
     
     club["points"] = int(club["points"]) - placesRequired
+    
+    places_allowed = places_allowed - placesRequired
     
     flash('Great-booking complete!')
     

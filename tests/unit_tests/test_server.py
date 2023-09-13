@@ -1,64 +1,98 @@
-import pytest
-import server
-from server import app, competitions, clubs
+import json
+from flask import Flask,render_template,request,redirect,flash,url_for
+
+MAXIMUM_BOOKINGS = 12
+
+def loadClubs():
+    with open('clubs.json') as c:
+         listOfClubs = json.load(c)['clubs']
+         return listOfClubs
 
 
-class TestShowSummary:   
-    def test_show_summary_with_existing_email(self, client, clubs, competitions, monkeypatch):
-        monkeypatch.setattr(server, "competitions", competitions)
-        monkeypatch.setattr(server, "clubs", clubs)
-        
-    def test_show_summary_with_existing_email(self, client, clubs, competitions, monkeypatch):
-        monkeypatch.setattr(server, "competitions", competitions)
-        monkeypatch.setattr(server, "clubs", clubs)
-        
-        response = client.post("/showSummary", data={"email": "john@simplylift.co"})
-        
-        assert b"john@simplylift.co" in response.data
-        
-    def test_login_with_invalid_email(self, client, clubs, competitions, monkeypatch):
-        monkeypatch.setattr(server, "competitions", competitions)
-        monkeypatch.setattr(server, "clubs", clubs)
-    def test_login_with_invalid_email(self, client, clubs, competitions, monkeypatch):
-        monkeypatch.setattr(server, "competitions", competitions)
-        monkeypatch.setattr(server, "clubs", clubs)
-        response = client.post("/showSummary", data={"email": "wrong@email.com"})
-        
-        assert b"Email not found. Please try a valid email." in response.data
-        
+def loadCompetitions():
+    with open('competitions.json') as comps:
+         listOfCompetitions = json.load(comps)['competitions']
+         return listOfCompetitions
 
-class TestPurchasePlaces:   
-    def test_purchase_places_with_enough_points(self, client, single_club, single_competition) :
-        competition = single_competition["name"]
-        club = single_club["name"]
-        club_points = int(single_club["points"])
-        places_booked = 5
 
-        response = client.post("/purchasePlaces", data={"club": club, "competition": competition, "places": places_booked})
-        
-        assert response.status_code == 200
-        assert "Great-booking complete!" in response.data.decode()
-        assert "Points available: 8" in response.data.decode()
-        
-    def test_purchase_places_with_excessive_points(self, client, single_club, single_competition) :
-        competition = single_competition["name"]
-        club = single_club["name"]
-        club_points = int(single_club["points"])
-        places_booked = 20
+app = Flask(__name__)
+app.secret_key = 'something_special'
 
-        response = client.post("/purchasePlaces", data={"club": club, "competition": competition, "places": places_booked})
-        
-        assert "have enough points to book this quantity. Please try again." in response.data.decode()
-        assert "Points available: 8" in response.data.decode()
-        
-    def test_purchase_places_with_negative_input(self, client, single_club, single_competition) :
-        competition = single_competition["name"]
-        club = single_club["name"]
-        club_points = int(single_club["points"])
-        places_booked = -2
+competitions = loadCompetitions()
+clubs = loadClubs()
 
-        response = client.post("/purchasePlaces", data={"club": club, "competition": competition, "places": places_booked})
-        
-        assert "This is not a correct value. Please try again." in response.data.decode()
-        assert "Points available: 8" in response.data.decode()
-        
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/showSummary',methods=['POST'])
+def showSummary():
+    try:
+        club = [club for club in clubs if club['email'] == request.form['email']][0]
+    except IndexError:
+        flash("Email not found. Please try a valid email.")
+        return render_template('index.html')
+    
+    return render_template('welcome.html', club=club, competitions=competitions)
+
+
+@app.route('/book/<competition>/<club>')
+def book(competition,club):
+    foundClub = [c for c in clubs if c['name'] == club][0]
+    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    
+    club_points = int(foundClub["points"])
+    places_allowed = MAXIMUM_BOOKINGS
+    
+    if club_points == "0":
+        flash("You do not have enough points to book places.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    if club_points < places_allowed:
+        places_allowed = club_points
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
+    
+    if foundClub and foundCompetition:
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
+    else:
+        flash("Something went wrong-please try again")
+        return render_template('welcome.html', club=club, competitions=competitions)
+
+
+@app.route('/purchasePlaces',methods=['POST'])
+def purchasePlaces():
+    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
+    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    club_points = int(club["points"])
+    placesRequired = int(request.form['places'])
+    places_allowed = MAXIMUM_BOOKINGS
+    
+    if club_points < places_allowed:
+        places_allowed = club_points
+    
+    if placesRequired > club_points or placesRequired > places_allowed:
+        flash("You are not allowed to book this quantity. Please try again.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    elif placesRequired <= 0:
+        flash("This is not a correct value. Please try again.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    
+    club["points"] = int(club["points"]) - placesRequired
+    
+    places_allowed = places_allowed - placesRequired
+    
+    flash('Great-booking complete!')
+    
+    return render_template('welcome.html', club=club, competitions=competitions)
+
+
+# TODO: Add route for points display
+
+
+@app.route('/logout')
+def logout():
+    return redirect(url_for('index'))
+
