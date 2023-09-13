@@ -1,153 +1,98 @@
-import pytest
-import server
-from server import app
+import json
+from flask import Flask,render_template,request,redirect,flash,url_for
 
-class TestMonkeys:
-    def test_competitions_returns_monkey(self, monkey_competitions):
-        expected_result = [
-            {
-                "name": "Spring Festival",
-                "date": "2020-03-27 10:00:00",
-                "numberOfPlaces": "25"
-            },
-            {
-                "name": "Fall Classic",
-                "date": "2020-10-22 13:30:00",
-                "numberOfPlaces": "13"
-            }
-        ]
+MAXIMUM_BOOKINGS = 12
 
-        assert server.competitions == expected_result
-        
-    def test_clubs_returns_monkey(self, monkey_clubs):
-        expected_result = [
-            {
-                "name": "Simply Lift",
-                "email": "john@simplylift.co",
-                "points": "13"
-            },
-            {
-                "name": "Iron Temple",
-                "email": "admin@irontemple.com",
-                "points": "4"
-            },
-            {   "name": "She Lifts",
-                "email": "kate@shelifts.co.uk",
-                "points": "12"
-            },
-            {
-                "name": "Dummy Club",
-                "email": "club@dummy.com",
-                "points": "0"
-            }
-        ]
+def loadClubs():
+    with open('clubs.json') as c:
+         listOfClubs = json.load(c)['clubs']
+         return listOfClubs
 
-        assert server.clubs == expected_result
 
-class TestShowSummary:
-    def test_show_summary_with_existing_email(self, client, monkey_clubs, monkey_competitions):
-        response = client.post("/showSummary", data={"email": "john@simplylift.co"})
-        
-        assert b"john@simplylift.co" in response.data
-        
-    def test_login_with_invalid_email(self, client, monkey_clubs, monkey_competitions):
-        response = client.post("/showSummary", data={"email": "wrong@email.com"})
-        
-        assert b"Email not found. Please try a valid email." in response.data
-        
-    def test_club_with_zero_point_cannot_access_to_booking_link(self, client, monkey_clubs, monkey_competitions):
-        response = client.post("/showSummary", data={"email": "club@dummy.com"})
-        
-        assert b"club@dummy.com" in response.data
-        assert b"Book Places" not in response.data
+def loadCompetitions():
+    with open('competitions.json') as comps:
+         listOfCompetitions = json.load(comps)['competitions']
+         return listOfCompetitions
 
-class TestPurchasePlaces:
-    def test_purchase_places_with_enough_points(self, client, monkey_clubs, monkey_competitions):      
-        places_booked = 5
-        data = {
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": places_booked
-        }
-        
-        response = client.post("/purchasePlaces", data=data)
-        
-        assert response.status_code == 200
-        assert "Great-booking complete!" in response.data.decode()
-        assert "Points available: 8" in response.data.decode()
-        
-    def test_purchase_places_with_excessive_points(self, client, monkey_clubs, monkey_competitions):
-        places_booked = 20
-        data = {
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": places_booked
-        }
-        
-        response = client.post("/purchasePlaces", data=data)
 
-        assert "You are not allowed to book this quantity. Please try again." in response.data.decode()
-        assert "Points available: 13" in response.data.decode()
-        
-    def test_purchase_places_with_negative_input(self, client, monkey_clubs, monkey_competitions):
-        places_booked = -2
-        data = {
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": places_booked
-        }
-        
-        response = client.post("/purchasePlaces", data=data)
-        
-        assert "This is not a correct value. Please try again." in response.data.decode()
-        assert "Points available: 13" in response.data.decode()
-        
-    def test_purchase_places_with_zero(self, client, monkey_clubs, monkey_competitions):
-        places_booked = 0
-        data = {
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": places_booked
-        }
-        
-        response = client.post("/purchasePlaces", data=data)
-        
-        assert "This is not a correct value. Please try again." in response.data.decode()
-        assert "Points available: 13" in response.data.decode()
-        
-    def test_cannot_purchase_more_than_12_places(self, client, monkey_clubs, monkey_competitions):
-        places_booked = 13
-        data = {
-            "competition": "Spring Festival",
-            "club": "Simply Lift",
-            "places": places_booked
-        }
-        
-        response = client.post("/purchasePlaces", data=data)
-        
-        assert "You are not allowed to book this quantity. Please try again." in response.data.decode()
-        
-class TestBook:
-    def test_places_allowed_is_between_1_and_12(self, client, monkey_clubs, monkey_competitions):
-        competition = "Spring Festival"
-        club = "Simply Lift"
+app = Flask(__name__)
+app.secret_key = 'something_special'
 
-        response = client.get(f"/book/{competition}/{club}")
-        
-        assert 'min="1" max="12"' in response.data.decode()
-        
-    def test_places_allowed_is_between_1_and_4(self, client, monkey_clubs, monkey_competitions):
-        competition = "Spring Festival"
-        club = "Iron Temple"
+competitions = loadCompetitions()
+clubs = loadClubs()
 
-        response = client.get(f"/book/{competition}/{club}")
-        
-        assert 'min="1" max="4"' in response.data.decode()
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/showSummary',methods=['POST'])
+def showSummary():
+    try:
+        club = [club for club in clubs if club['email'] == request.form['email']][0]
+    except IndexError:
+        flash("Email not found. Please try a valid email.")
+        return render_template('index.html')
     
-    def test_booking_is_impossible_for_a_club_with_zero_point(self, client, monkey_clubs, monkey_competitions):
-        competition = "Spring Festival"
-        club = "Dummy Club"
+    return render_template('welcome.html', club=club, competitions=competitions)
 
-        response = client.get(f"/book/{competition}/{club}")
 
-        assert "You do not have enough points to book places." in response.data.decode()
+@app.route('/book/<competition>/<club>')
+def book(competition,club):
+    foundClub = [c for c in clubs if c['name'] == club][0]
+    foundCompetition = [c for c in competitions if c['name'] == competition][0]
+    
+    club_points = int(foundClub["points"])
+    places_allowed = MAXIMUM_BOOKINGS
+    
+    if club_points == "0":
+        flash("You do not have enough points to book places.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    if club_points < places_allowed:
+        places_allowed = club_points
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
+    
+    if foundClub and foundCompetition:
+        return render_template('booking.html',club=foundClub,competition=foundCompetition, limit=places_allowed)
+    else:
+        flash("Something went wrong-please try again")
+        return render_template('welcome.html', club=club, competitions=competitions)
+
+
+@app.route('/purchasePlaces',methods=['POST'])
+def purchasePlaces():
+    competition = [c for c in competitions if c['name'] == request.form['competition']][0]
+    club = [c for c in clubs if c['name'] == request.form['club']][0]
+    club_points = int(club["points"])
+    placesRequired = int(request.form['places'])
+    places_allowed = MAXIMUM_BOOKINGS
+    
+    if club_points < places_allowed:
+        places_allowed = club_points
+    
+    if placesRequired > club_points or placesRequired > places_allowed:
+        flash("You are not allowed to book this quantity. Please try again.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    elif placesRequired <= 0:
+        flash("This is not a correct value. Please try again.")
+        return render_template('welcome.html', club=club, competitions=competitions)
+    
+    competition['numberOfPlaces'] = int(competition['numberOfPlaces'])-placesRequired
+    
+    club["points"] = int(club["points"]) - placesRequired
+    
+    places_allowed = places_allowed - placesRequired
+    
+    flash('Great-booking complete!')
+    
+    return render_template('welcome.html', club=club, competitions=competitions)
+
+
+# TODO: Add route for points display
+
+
+@app.route('/logout')
+def logout():
+    return redirect(url_for('index'))
+
