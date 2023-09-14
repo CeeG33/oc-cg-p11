@@ -32,12 +32,13 @@ class TestShowSummary:
         
     def test_show_summary_with_past_competitions(self, client, monkey_clubs, monkey_competitions):
         response = client.post("/showSummary", data={"email": "john@simplylift.co"})
-        
+        print(response.data.decode())
         assert b"Spring Festival" in response.data
+        assert b"Competition closed" in response.data
         
     def test_cannot_access_past_competitions_booking_page(self, client, monkey_clubs, monkey_competitions):
         response = client.post("/showSummary", data={"email": "john@simplylift.co"})
-        print(response.data.decode())
+        
         assert f'<a href="/book/Fall%20Classic/' not in response.data.decode()
         
     def test_show_summary_with_incoming_competitions(self, client, monkey_clubs, monkey_competitions):
@@ -157,3 +158,35 @@ class TestBook:
         
         assert "Booking in a past competition is impossible." in response.data.decode()
         assert "john@simplylift.co" in response.data.decode()
+        
+
+class TestPoints:
+    def test_points_page_works(self, client, monkey_clubs):
+        response = client.get(f"/points")
+        
+        assert "Registered clubs' points to date" in response.data.decode()
+        
+    def test_points_page_show_existing_club_name(self, client, monkey_clubs):
+        response = client.get(f"/points")
+        
+        assert "She Lifts" in response.data.decode()
+        
+    def test_points_page_show_existing_club_points(self, client, monkey_clubs):
+        response = client.get(f"/points")
+        
+        assert "12" in response.data.decode()
+        
+    def test_points_page_does_not_show_invalid_club(self, client, monkey_clubs):
+        response = client.get(f"/points")
+        
+        assert "Fake Club" not in response.data.decode()
+        
+    def test_points_page_does_not_show_invalid_club_points(self, client, monkey_clubs):
+        response = client.get(f"/points")
+        
+        assert "5000" not in response.data.decode()
+    
+    def test_points_page_does_not_show_without_clubs(self, client, monkey_incorrect_clubs):
+        response = client.get(f"/points")
+        
+        assert "Page unavailable." in response.data.decode()

@@ -59,3 +59,11 @@ def monkey_competitions(monkeypatch):
     monkeypatch.setattr(server, "competitions", competitions)
     
     return competitions
+
+@pytest.fixture()
+def monkey_incorrect_clubs(monkeypatch):
+    clubs = []
+    
+    monkeypatch.setattr(server, "clubs", clubs)
+    
+    return clubs
