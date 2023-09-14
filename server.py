@@ -71,6 +71,9 @@ def book(competition,club):
 
 @app.route('/purchasePlaces',methods=['POST'])
 def purchasePlaces():
+    """This docstrings is show that the issue with club points update
+    was already handled and tested in this fonction during the resolution of bug nr 2.
+    """
     competition = [c for c in competitions if c['name'] == request.form['competition']][0]
     club = [c for c in clubs if c['name'] == request.form['club']][0]
     club_points = int(club["points"])
