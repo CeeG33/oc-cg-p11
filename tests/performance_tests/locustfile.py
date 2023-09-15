@@ -8,7 +8,9 @@ class ProjectPerfTest(HttpUser):
 
     @task()
     def show_summary(self):
-        response = self.client.post("/showSummary", {"email": "john@simplylift.co"})
+        response = self.client.post(
+            "/show_summary", {"email": "john@simplylift.co"}
+        )
 
     @task
     def book(self):
@@ -17,8 +19,12 @@ class ProjectPerfTest(HttpUser):
     @task
     def purchase_places(self):
         response = self.client.post(
-            "/purchasePlaces",
-            {"competition": "Spring Festival", "club": "Simply Lift", "places": "5"},
+            "/purchase_places",
+            {
+                "competition": "Spring Festival",
+                "club": "Simply Lift",
+                "places": "5",
+            },
         )
 
     @task
