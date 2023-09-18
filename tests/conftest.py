@@ -1,17 +1,23 @@
 import pytest
 
 import server
-from server import app, request
+from server import app
 
 
 @pytest.fixture
 def client():
+    """Create and configure a test client for the Flask app."""
     app.config["TESTING"] = True
     return app.test_client()
 
 
 @pytest.fixture()
 def monkey_clubs(monkeypatch):
+    """Fixture to provide mocked club data for testing.
+
+    Returns:
+        list[dict]: A list of dictionaries representing club data.
+    """
     clubs = [
         {"name": "Simply Lift", "email": "john@simplylift.co", "points": "13"},
         {
@@ -30,6 +36,11 @@ def monkey_clubs(monkeypatch):
 
 @pytest.fixture()
 def monkey_competitions(monkeypatch):
+    """Fixture to provide mocked competition data for testing.
+
+    Returns:
+        list[dict]: A list of dictionaries representing competition data.
+    """
     competitions = [
         {
             "name": "Spring Festival",
@@ -55,6 +66,12 @@ def monkey_competitions(monkeypatch):
 
 @pytest.fixture()
 def monkey_incorrect_clubs(monkeypatch):
+    """Fixture to provide an empty list of clubs for testing
+    when clubs do not exist.
+
+    Returns:
+        list[dict]: An empty list of dictionaries representing club data.
+    """
     clubs = []
 
     monkeypatch.setattr(server, "clubs", clubs)
@@ -64,7 +81,11 @@ def monkey_incorrect_clubs(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_name_returns_dummy_club(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_club_via_name function returning
+    dummy club data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {"name": "Dummy Club", "email": "club@dummy.com", "points": "0"}
 
     monkeypatch.setattr(server, "helper_get_club_via_name", mockreturn)
@@ -72,7 +93,11 @@ def monkey_helper_get_club_via_name_returns_dummy_club(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_name_returns_simply_lift(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_club_via_name function returning
+    Simply Lift club data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {
             "name": "Simply Lift",
             "email": "john@simplylift.co",
@@ -84,7 +109,11 @@ def monkey_helper_get_club_via_name_returns_simply_lift(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_name_returns_iron_temple(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_club_via_name function returning
+    Iron Temple club data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {
             "name": "Iron Temple",
             "email": "admin@irontemple.com",
@@ -96,7 +125,9 @@ def monkey_helper_get_club_via_name_returns_iron_temple(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_name_returns_none(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the scenario when the club is not found."""
+
+    def mockreturn(*args, **kwargs):
         return None
 
     monkeypatch.setattr(server, "helper_get_club_via_name", mockreturn)
@@ -104,7 +135,11 @@ def monkey_helper_get_club_via_name_returns_none(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_email_returns_dummy_club(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_club_via_email function returning
+    dummy club data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {"name": "Dummy Club", "email": "club@dummy.com", "points": "0"}
 
     monkeypatch.setattr(server, "helper_get_club_via_email", mockreturn)
@@ -112,7 +147,11 @@ def monkey_helper_get_club_via_email_returns_dummy_club(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_email_returns_simply_lift(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_club_via_email function returning
+    Simply Lift club data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {
             "name": "Simply Lift",
             "email": "john@simplylift.co",
@@ -124,7 +163,11 @@ def monkey_helper_get_club_via_email_returns_simply_lift(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_email_returns_iron_temple(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_club_via_email function returning
+    Iron Temple club data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {
             "name": "Iron Temple",
             "email": "admin@irontemple.com",
@@ -136,7 +179,9 @@ def monkey_helper_get_club_via_email_returns_iron_temple(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_club_via_email_returns_none(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the scenario when the club is not found."""
+
+    def mockreturn(*args, **kwargs):
         return None
 
     monkeypatch.setattr(server, "helper_get_club_via_email", mockreturn)
@@ -144,7 +189,11 @@ def monkey_helper_get_club_via_email_returns_none(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_competition_returns_spring_festival(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_competition_via_name function
+    returning Spring Festival competition data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {
             "name": "Spring Festival",
             "date": "2030-03-27 10:00:00",
@@ -156,7 +205,11 @@ def monkey_helper_get_competition_returns_spring_festival(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_competition_returns_fall_classic(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the helper_get_competition_via_name function
+    returning Fall Classic competition data.
+    """
+
+    def mockreturn(*args, **kwargs):
         return {
             "name": "Fall Classic",
             "date": "2020-10-22 13:30:00",
@@ -168,16 +221,9 @@ def monkey_helper_get_competition_returns_fall_classic(monkeypatch):
 
 @pytest.fixture()
 def monkey_helper_get_competition_returns_none(monkeypatch):
-    def mockreturn():
+    """Fixture to mock the scenario when the competition is not found."""
+
+    def mockreturn(*args, **kwargs):
         return None
 
     monkeypatch.setattr(server, "helper_get_competition_via_name", mockreturn)
-
-
-class MockRequest:
-    form = {"email": "john@simplylift.co"}
-
-
-@pytest.fixture()
-def mock_request_valid_email():
-    return MockRequest()
