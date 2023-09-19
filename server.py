@@ -220,7 +220,7 @@ def purchase_places():
         places_allowed = club_points
 
     elif places_required > club_points or places_required > places_allowed:
-        flash("You are not allowed to book this quantity. Please try again.")
+        flash(f"You can book a maximum quantity of {places_allowed}. Please try again.")
         return render_template(
             "welcome.html",
             club=club,
