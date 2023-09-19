@@ -44,8 +44,21 @@
 
 5. Testing
 
-    You are free to use whatever testing framework you like-the main thing is that you can show what tests you are using.
-
-    We also like to show how well we're testing, so there's a module called 
-    [coverage](https://coverage.readthedocs.io/en/coverage-5.1/) you should add to your project.
+    Please find below a list of commands you can run using the implemented test suite:
+   
+    * Launching all the tests : Go to the root folder and type the following command : ```pytest tests/``` or ```pytest tests/ -vv``` should you wish to have more details about the tests.
+    * Checking the test coverage : Go to the root folder and type the following command : ```pytest --cov=. tests/```
+    * Launching a performance test :
+      * Go to the following folder : ```oc-cg-p11/tests/performance_tests/``` and type the following command : ```locust```
+      * On your browser, go to the following link : ```http://localhost:8089/```
+      * Populate the fields with the following informations:
+        ```
+        Number of users : 1
+        Spawn Rate : 1
+        Host : http://127.0.0.1:5000/ 
+        ```
+        The host field should correspond to the address on which the application is running, please amend if yours is different.
+      * Click on the ```Start swarming``` button.
+      * Important reminder 1 : You have to have the application running in another terminal. Otherwise, the test won't work.
+      * Important reminder 2 : Hit the stop button before leaving the Locust page.
 
