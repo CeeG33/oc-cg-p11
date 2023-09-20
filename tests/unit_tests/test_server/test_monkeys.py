@@ -10,6 +10,7 @@ def test_competitions_returns_monkey(monkey_competitions):
 
     assert server.competitions == expected_result
 
+
 def test_clubs_returns_monkey(monkey_clubs):
     """Given clubs data is mocked,
     When accessing server.py clubs variable,

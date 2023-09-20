@@ -23,6 +23,7 @@ def test_booking_with_incorrect_club(
         in response.data.decode()
     )
 
+
 def test_booking_with_incorrect_competition(
     client,
     monkey_clubs,
@@ -45,6 +46,7 @@ def test_booking_with_incorrect_competition(
         in response.data.decode()
     )
 
+
 def test_places_allowed_is_between_1_and_12(
     client,
     monkey_clubs,
@@ -63,6 +65,7 @@ def test_places_allowed_is_between_1_and_12(
     response = client.get(f"/book/{competition}/{club}")
 
     assert 'min="1" max="12"' in response.data.decode()
+
 
 def test_places_allowed_is_between_1_and_4(
     client,
@@ -84,6 +87,7 @@ def test_places_allowed_is_between_1_and_4(
 
     assert 'min="1" max="4"' in response.data.decode()
 
+
 def test_booking_is_impossible_for_a_club_with_zero_point(
     client,
     monkey_clubs,
@@ -102,11 +106,9 @@ def test_booking_is_impossible_for_a_club_with_zero_point(
 
     response = client.get(f"/book/{competition}/{club}")
 
-    assert (
-        "You do not have enough points to book places."
-        in response.data.decode()
-    )
+    assert "You do not have enough points to book places." in response.data.decode()
     assert "club@dummy.com" in response.data.decode()
+
 
 def test_booking_in_past_competition_is_impossible(
     client,
@@ -125,8 +127,5 @@ def test_booking_in_past_competition_is_impossible(
 
     response = client.get(f"/book/{competition}/{club}")
 
-    assert (
-        "Booking in a past competition is impossible."
-        in response.data.decode()
-    )
+    assert "Booking in a past competition is impossible." in response.data.decode()
     assert "john@simplylift.co" in response.data.decode()

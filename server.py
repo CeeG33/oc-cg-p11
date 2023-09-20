@@ -201,9 +201,7 @@ def purchase_places():
         return render_template("index.html")
 
     club_points = int(club["points"])
-    competition_date = datetime.strptime(
-        competition["date"], "%Y-%m-%d %H:%M:%S"
-    )
+    competition_date = datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
     places_required = int(request.form["places"])
     places_allowed = MAXIMUM_BOOKINGS
 
@@ -246,9 +244,7 @@ def purchase_places():
             today=CURRENT_DATE,
         )
 
-    competition["numberOfPlaces"] = (
-        int(competition["numberOfPlaces"]) - places_required
-    )
+    competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - places_required
 
     club["points"] = int(club["points"]) - places_required
 

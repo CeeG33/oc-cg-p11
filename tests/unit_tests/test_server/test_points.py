@@ -11,6 +11,7 @@ def test_points_page_works(client, monkey_clubs):
 
     assert "Registered clubs' points to date" in response.data.decode()
 
+
 def test_points_page_show_existing_club_name(client, monkey_clubs):
     """Given valid club data,
     When accessing the /points route,
@@ -20,6 +21,7 @@ def test_points_page_show_existing_club_name(client, monkey_clubs):
     response = client.get(f"/points")
 
     assert "She Lifts" in response.data.decode()
+
 
 def test_points_page_show_existing_club_points(client, monkey_clubs):
     """Given valid club data,
@@ -31,9 +33,8 @@ def test_points_page_show_existing_club_points(client, monkey_clubs):
 
     assert "12" in response.data.decode()
 
-def test_points_page_does_not_show_invalid_club(
-    client, monkey_clubs
-):
+
+def test_points_page_does_not_show_invalid_club(client, monkey_clubs):
     """Given valid club data,
     When accessing the /points route,
     Then it should return a page displaying a table showing
@@ -43,9 +44,8 @@ def test_points_page_does_not_show_invalid_club(
 
     assert "Fake Club" not in response.data.decode()
 
-def test_points_page_does_not_show_invalid_club_points(
-    client, monkey_clubs
-):
+
+def test_points_page_does_not_show_invalid_club_points(client, monkey_clubs):
     """Given valid club data,
     When accessing the /points route,
     Then it should return a page displaying a table showing
@@ -55,9 +55,8 @@ def test_points_page_does_not_show_invalid_club_points(
 
     assert "5000" not in response.data.decode()
 
-def test_points_page_does_not_show_without_clubs(
-    client, monkey_incorrect_clubs
-):
+
+def test_points_page_does_not_show_without_clubs(client, monkey_incorrect_clubs):
     """Given an empty database,
     When accessing the /points route,
     Then it should display a message indicating that

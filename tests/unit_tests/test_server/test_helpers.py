@@ -15,6 +15,7 @@ def test_get_club_via_email(client, monkey_clubs):
 
     assert server.helper_get_club_via_email(test_data) == expected_result
 
+
 def test_get_club_via_invalid_email(client, monkey_clubs):
     """Given an invalid email and mocked club data,
     When calling helper_get_club_via_email,
@@ -23,6 +24,7 @@ def test_get_club_via_invalid_email(client, monkey_clubs):
     test_data = "wrong@email.Com"
 
     assert server.helper_get_club_via_email(test_data) == None
+
 
 def test_get_club_via_name(client, monkeypatch, monkey_clubs):
     """Given a club name and mocked data,
@@ -39,9 +41,8 @@ def test_get_club_via_name(client, monkeypatch, monkey_clubs):
 
     assert server.helper_get_club_via_name(test_data) == expected_result
 
-def test_get_club_via_invalid_name(
-    client, monkeypatch, monkey_clubs
-):
+
+def test_get_club_via_invalid_name(client, monkeypatch, monkey_clubs):
     """Given an invalid club name and mocked data,
     When calling helper_get_club_via_name,
     Then it should return None.
@@ -50,9 +51,8 @@ def test_get_club_via_invalid_name(
 
     assert server.helper_get_club_via_name(test_data) == None
 
-def test_get_competition_via_name(
-    client, monkeypatch, monkey_competitions
-):
+
+def test_get_competition_via_name(client, monkeypatch, monkey_competitions):
     """Given a competition name and mocked data,
     When calling helper_get_competition_via_name,
     Then it should return the corresponding competition data.
@@ -65,14 +65,10 @@ def test_get_competition_via_name(
         "numberOfPlaces": "25",
     }
 
-    assert (
-        server.helper_get_competition_via_name(test_data)
-        == expected_result
-    )
+    assert server.helper_get_competition_via_name(test_data) == expected_result
 
-def test_get_competition_via_invalid_name(
-    client, monkeypatch, monkey_competitions
-):
+
+def test_get_competition_via_invalid_name(client, monkeypatch, monkey_competitions):
     """Given an invalid competition name and mocked data,
     When calling helper_get_competition_via_name,
     Then it should return None.

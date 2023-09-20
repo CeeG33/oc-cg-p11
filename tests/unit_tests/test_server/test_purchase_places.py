@@ -28,6 +28,7 @@ def test_purchase_places_with_enough_points(
     assert "Great, booking complete !" in response.data.decode()
     assert "Points available: 8" in response.data.decode()
 
+
 def test_purchase_places_with_excessive_points(
     client,
     monkey_clubs,
@@ -57,6 +58,7 @@ def test_purchase_places_with_excessive_points(
     )
     assert "Points available: 13" in response.data.decode()
 
+
 def test_purchase_places_with_negative_input(
     client,
     monkey_clubs,
@@ -80,11 +82,9 @@ def test_purchase_places_with_negative_input(
 
     response = client.post("/purchase_places", data=data)
 
-    assert (
-        "This is not a correct value. Please try again."
-        in response.data.decode()
-    )
+    assert "This is not a correct value. Please try again." in response.data.decode()
     assert "Points available: 13" in response.data.decode()
+
 
 def test_purchase_places_with_zero(
     client,
@@ -109,11 +109,9 @@ def test_purchase_places_with_zero(
 
     response = client.post("/purchase_places", data=data)
 
-    assert (
-        "This is not a correct value. Please try again."
-        in response.data.decode()
-    )
+    assert "This is not a correct value. Please try again." in response.data.decode()
     assert "Points available: 13" in response.data.decode()
+
 
 def test_cannot_purchase_more_than_12_places(
     client,
@@ -143,6 +141,7 @@ def test_cannot_purchase_more_than_12_places(
         in response.data.decode()
     )
 
+
 def test_cannot_purchase_in_past_competition(
     client,
     monkey_clubs,
@@ -165,10 +164,8 @@ def test_cannot_purchase_in_past_competition(
 
     response = client.post("/purchase_places", data=data)
 
-    assert (
-        "Booking in a past competition is impossible."
-        in response.data.decode()
-    )
+    assert "Booking in a past competition is impossible." in response.data.decode()
+
 
 def test_club_without_point_cannot_purchase(
     client,
@@ -192,10 +189,8 @@ def test_club_without_point_cannot_purchase(
 
     response = client.post("/purchase_places", data=data)
 
-    assert (
-        "You do not have enough points to book places."
-        in response.data.decode()
-    )
+    assert "You do not have enough points to book places." in response.data.decode()
+
 
 def test_purchase_places_with_invalid_club(
     client,
@@ -222,6 +217,7 @@ def test_purchase_places_with_invalid_club(
         "book if the competition or the account is invalid. Please try again."
         in response.data.decode()
     )
+
 
 def test_purchase_places_with_invalid_competition(
     client,

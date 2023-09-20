@@ -9,7 +9,4 @@ def test_index_works(client):
     """
     response = client.get(f"/")
 
-    assert (
-        "Please enter your secretary email to continue"
-        in response.data.decode()
-    )
+    assert "Please enter your secretary email to continue" in response.data.decode()
