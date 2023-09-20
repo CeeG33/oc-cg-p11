@@ -201,9 +201,7 @@ def purchase_places():
         return render_template("index.html")
 
     club_points = int(club["points"])
-    competition_date = datetime.strptime(
-        competition["date"], "%Y-%m-%d %H:%M:%S"
-    )
+    competition_date = datetime.strptime(competition["date"], "%Y-%m-%d %H:%M:%S")
     places_required = int(request.form["places"])
     places_allowed = MAXIMUM_BOOKINGS
 
@@ -220,7 +218,7 @@ def purchase_places():
         places_allowed = club_points
 
     elif places_required > club_points or places_required > places_allowed:
-        flash("You are not allowed to book this quantity. Please try again.")
+        flash(f"You can book a maximum quantity of {places_allowed}. Please try again.")
         return render_template(
             "welcome.html",
             club=club,
@@ -246,9 +244,7 @@ def purchase_places():
             today=CURRENT_DATE,
         )
 
-    competition["numberOfPlaces"] = (
-        int(competition["numberOfPlaces"]) - places_required
-    )
+    competition["numberOfPlaces"] = int(competition["numberOfPlaces"]) - places_required
 
     club["points"] = int(club["points"]) - places_required
 

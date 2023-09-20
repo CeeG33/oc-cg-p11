@@ -14,9 +14,7 @@ class ProjectPerfTest(HttpUser):
         """Task to simulate posting a request to '/show_summary'
         with a valid sample email.
         """
-        response = self.client.post(
-            "/show_summary", {"email": "john@simplylift.co"}
-        )
+        response = self.client.post("/show_summary", {"email": "john@simplylift.co"})
 
     @task
     def book(self):
